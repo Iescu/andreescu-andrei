@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Andreescu Andrei-Alin | B2B Marketing Specialist</title>
+  <meta name="description" content="Portfolio of Andreescu Andrei-Alin, B2B marketing specialist.">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/icons/favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@900&family=Inter+Tight:wght@300;400;700&display=swap">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/xp.css">
+</head>
+<body>
+  <main>
+    <section class="hero" aria-label="Introduction">
+      <div class="hero-frame">
+        <div class="hero-media">
+          <div class="hero-art">
+            <!-- Looping desktop wallpaper. Started by the animation loop in js/main.js, so it stays still under reduced motion. -->
+            <video class="bg-video" src="assets/video/portfolio-background.mp4" muted loop playsinline disablepictureinpicture preload="auto" tabindex="-1" aria-hidden="true"></video>
+            <canvas class="grain" aria-hidden="true"></canvas>
+          </div>
+          <!-- Desktop icon, top-left like on Windows: opens the side projects folder. -->
+          <button class="desktop-icon" type="button" data-folder aria-haspopup="dialog">
+            <img class="folder-glyph" src="assets/icons/folder.svg" width="16" height="16" alt="">
+            <span class="desktop-icon-label">side projects</span>
+          </button>
+          <div class="taskbar" role="toolbar" aria-label="Taskbar">
+            <button class="start-btn" type="button" popovertarget="start-menu" aria-label="Start menu" title="Start menu">
+              <img src="assets/icons/pixel/start.png" width="16" height="16" alt=""><span>start</span>
+            </button>
+            <div class="dock" id="dock" role="group" aria-label="Projects"></div>
+            <div class="taskbar-tray">
+              <button class="tray-btn" type="button" data-dialog="about" aria-label="About me" title="About me">
+                <img src="assets/icons/pixel/user.png" width="16" height="16" alt="">
+              </button>
+              <a class="tray-btn" href="assets/cv.pdf" target="_blank" rel="noopener" aria-label="Open CV in a new tab" title="Open CV">
+                <img src="assets/icons/pixel/cv.png" width="16" height="16" alt="">
+              </a>
+              <h1 class="name">
+                <button class="contact-btn" type="button" popovertarget="card" aria-label="Andreescu Andrei-Alin, contact details" title="Contact details">
+                  <img src="assets/icons/pixel/mail.png" width="16" height="16" alt="">
+                  <span class="name-lines"><span data-fit>ANDREESCU</span><span data-fit>ANDREI-ALIN</span></span>
+                </button>
+              </h1>
+              <button class="show-desktop" type="button" id="show-desktop" aria-label="Show desktop" title="Show desktop"></button>
+            </div>
+          </div>
+        </div>
+
+        <div class="windows" id="windows" role="region" aria-label="Projects"></div>
+      </div>
+    </section>
+  </main>
+
+  <div class="win-overlay" id="win-overlay" hidden></div>
+
+  <!-- Full-screen project page ("View project →"): fills the screen down to the taskbar,
+       which stays visible and usable underneath. -->
+  <section class="page-win" id="page-win" role="dialog" aria-modal="false" aria-labelledby="page-win-name" tabindex="-1" hidden>
+    <div class="win-bar">
+      <img class="win-ico" src="assets/icons/folder.svg" width="16" height="16" alt="">
+      <span class="win-name" id="page-win-name"></span>
+      <span class="win-ctrls">
+        <button class="win-btn" type="button" data-page="desktop" aria-label="Back to the desktop" title="Back to the desktop">
+          <svg viewBox="0 0 10 10" aria-hidden="true" focusable="false"><path d="M5 .5v8.5M1.5 5.5L5 9l3.5-3.5"/></svg>
+        </button>
+        <button class="win-btn" type="button" data-page="minimize" aria-label="Minimize">
+          <svg viewBox="0 0 10 10" aria-hidden="true" focusable="false"><path d="M0 5.5h10"/></svg>
+        </button>
+        <button class="win-btn" type="button" data-page="restore" aria-label="Restore to a window">
+          <svg viewBox="0 0 10 10" aria-hidden="true" focusable="false"><path d="M2.5 2.5V.5h7v7h-2"/><rect x=".5" y="2.5" width="7" height="7"/></svg>
+        </button>
+        <button class="win-btn win-close" type="button" data-page="close" aria-label="Close">
+          <svg viewBox="0 0 10 10" aria-hidden="true" focusable="false"><path d="M.5.5l9 9M9.5.5l-9 9"/></svg>
+        </button>
+      </span>
+    </div>
+    <iframe class="page-win-frame" title="Project page"></iframe>
+  </section>
+
+  <!-- Business card flyout: opens above the bottom-right of the taskbar, like the Windows 11
+       calendar. Light dismiss: click anywhere else or press Escape. -->
+  <div class="card-flyout" id="card" popover role="dialog" aria-label="Business card">
+    <div class="bcard">
+      <p class="bcard-name"><span data-fit>ANDREESCU</span><span data-fit>ANDREI-ALIN</span></p>
+      <p class="bcard-role">B2B Marketing Specialist</p>
+      <p class="bcard-contact">
+        <a class="bcard-linkedin" href="https://www.linkedin.com/in/andreescu-andrei-7209922bb" target="_blank" rel="noopener" aria-label="LinkedIn profile (opens in a new tab)">
+          <img src="assets/icons/linkedin.webp" alt="" width="32" height="32">
+        </a>
+        <a href="mailto:andreescuandrei1234@yahoo.com">andreescuandrei1234@yahoo.com</a>
+      </p>
+    </div>
+  </div>
+
+  <!-- Start menu: opens above the left end of the taskbar. Light dismiss: click anywhere else or press Escape. -->
+  <div class="start-menu" id="start-menu" popover aria-label="Start menu">
+    <div class="start-head"><img src="assets/icons/pixel/user.png" width="16" height="16" alt="">Andreescu Andrei-Alin</div>
+    <ul class="start-list">
+      <li><button class="start-item" type="button" data-start="folder"><img src="assets/icons/folder.svg" width="16" height="16" alt="">Side projects</button></li>
+      <li><button class="start-item" type="button" data-dialog="about"><img src="assets/icons/pixel/user.png" width="16" height="16" alt="">About me</button></li>
+      <li><a class="start-item" href="assets/cv.pdf" target="_blank" rel="noopener"><img src="assets/icons/pixel/cv.png" width="16" height="16" alt="">Open CV</a></li>
+      <li><button class="start-item" type="button" data-start="card"><img src="assets/icons/pixel/mail.png" width="16" height="16" alt="">Contact details</button></li>
+    </ul>
+  </div>
+
+  <!-- Side projects folder, styled like a project window. Items come from SIDE_PROJECTS in js/main.js;
+       each opens its page in the full-screen project window. -->
+  <dialog class="folder-dialog" id="folder" aria-labelledby="folder-title">
+    <div class="win-bar">
+      <img class="win-ico" src="assets/icons/folder.svg" width="16" height="16" alt="">
+      <span class="win-name" id="folder-title">side projects</span>
+      <span class="win-ctrls">
+        <button class="win-btn win-close" type="button" data-close aria-label="Close">
+          <svg viewBox="0 0 10 10" aria-hidden="true" focusable="false"><path d="M.5.5l9 9M9.5.5l-9 9"/></svg>
+        </button>
+      </span>
+    </div>
+    <p class="folder-path"><span class="folder-path-box" id="folder-path"></span></p>
+    <ul class="folder-grid" id="folder-grid"></ul>
+  </dialog>
+
+  <!-- About me pop-up, styled like a project window. -->
+  <dialog class="about-dialog" id="about" aria-labelledby="about-title">
+    <div class="win-bar">
+      <img class="win-ico" src="assets/icons/pixel/user.png" width="16" height="16" alt="">
+      <span class="win-name">about_me.txt</span>
+      <span class="win-ctrls">
+        <button class="win-btn win-close" type="button" data-close aria-label="Close">
+          <svg viewBox="0 0 10 10" aria-hidden="true" focusable="false"><path d="M.5.5l9 9M9.5.5l-9 9"/></svg>
+        </button>
+      </span>
+    </div>
+    <div class="about-body">
+      <h2 class="about-title" id="about-title">About me</h2>
+      <!-- Draft copy: replace with your own. -->
+      <p>Marketing creative with a B2B background and a graduate of FEAA, West University of Timișoara.</p>
+      <p>I'm a B2B Marketing Specialist at nJoy, where I run LinkedIn ABM campaigns, create materials for business partners and coordinate visuals for campaigns and trade fairs.</p>
+      <p>Alongside it, I'm the Marketing Creative at beoopsie, covering social media content, product photography, newsletters and the Shopify store.</p>
+    </div>
+  </dialog>
+
+  <script src="js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Erasmus+ Malta – Andrei Andreescu</title>
+  <meta name="description" content="Andrei Andreescu’s Erasmus+ program in Malta (October 2026): the POWER Clean Energy Café on clean energy, security-related disinformation and science communication.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #000;
+      --bar: #000;
+      --border: #2e2e2e;
+      --pad: clamp(28px, 5vw, 72px); /* text inset, shared by the caption and the split sections */
+      --text: #f2f2f2;
+      --muted: #a8a8a8;
+      --accent: #f2f2f2;
+      --mono: "JetBrains Mono", ui-monospace, monospace;
+      --sans: "Inter", system-ui, sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    /* One screen per section; scroll.js moves between them (one per scroll, or to the top / bottom on a hard scroll). */
+    html { overscroll-behavior: none; }
+    body { background: var(--bg); color: var(--text); font-family: var(--sans); line-height: 1.6; }
+    a { color: var(--accent); }
+
+    /* ---------- Window title bar (as in the project_*.net windows) ---------- */
+    .titlebar {
+      display: flex; justify-content: space-between; align-items: center;
+      background: var(--bar); padding: 8px 14px; border-bottom: 1px solid var(--border);
+      font-family: var(--mono); font-size: 13px; font-weight: 700;
+    }
+    .controls { display: flex; gap: 18px; font-weight: 400; color: var(--muted); }
+    .embedded .titlebar { display: none; } /* the portfolio window supplies its own */
+
+    /* ---------- 1. HERO ---------- */
+    /* Hero = title bar + photo + caption, together exactly one screen tall */
+    .hero { height: 100vh; height: 100svh; display: flex; flex-direction: column; border-bottom: 1px solid var(--border); }
+    .hero-img {
+      position: relative; flex: 1 1 auto; min-height: 0;
+      background: #1a1a1a center / cover no-repeat;
+    }
+    /* Placeholder: marks text and images still to be filled in. Remove the class once replaced. */
+    .todo { outline: 1px dashed #5a5a5a; outline-offset: 4px; }
+    .hero-img.todo, .split-img.todo { outline-offset: -12px; display: grid; place-items: center; font-family: var(--mono); font-size: 12px; color: var(--muted); }
+    /* Same left inset as the split text; the title and description run up to the middle of the screen,
+       the link + dates row spans the full width. */
+    .caption { padding: 24px var(--pad) 28px; display: grid; gap: 10px; background: var(--bg); }
+    .caption h1, .caption p { max-width: 50%; }
+    .caption h1 { font-size: 22px; font-weight: 800; }
+    .caption p { font-family: var(--mono); font-size: 13.5px; color: var(--muted); }
+    .caption-foot {
+      display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px;
+      font-family: var(--mono); font-size: 13px; margin-top: 4px;
+    }
+    .caption-foot a { color: var(--text); text-decoration: none; border-bottom: 1px solid var(--text); }
+
+    /* ---------- 2–3. SPLIT SECTIONS (half image / half text) ---------- */
+    .split {
+      display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); height: 100vh; height: 100svh;
+
+      border-bottom: 1px solid var(--border);
+    }
+    .split.reverse .split-img { order: 2; }
+    .split-img { background: #1a1a1a center / cover no-repeat; min-height: 320px; }
+    .split-text {
+      padding: var(--pad); display: flex; flex-direction: column;
+      justify-content: center; gap: 18px;
+    }
+    .label { font-family: var(--mono); font-size: 12px; color: var(--accent); letter-spacing: .08em; text-transform: uppercase; }
+    h2 { font-size: clamp(26px, 3vw, 38px); font-weight: 800; line-height: 1.15; }
+    .lead { color: #d8d8d8; }
+
+    /* The footer shares the last screen with the final section, so no extra scroll is needed to reach it. */
+    footer { height: 64px; display: flex; align-items: center; justify-content: center; padding: 0 16px; font-family: var(--mono); font-size: 12px; line-height: 1.5; color: var(--muted); text-align: center; }
+    .split:has(+ footer) { height: calc(100vh - 64px); height: calc(100svh - 64px); }
+
+    @media (max-width: 860px) {
+      /* Phones: still one screen per section, the image takes whatever height the text leaves. */
+      .split { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) auto; }
+      .split.reverse .split-img { order: 0; }
+      .split-img { min-height: 0; }
+      .split-text { padding: 28px 16px 40px; }
+      .caption { padding: 20px 16px 28px; }
+      .caption h1, .caption p { max-width: none; }
+    }
+  </style>
+  <link rel="stylesheet" href="xp-page.css">
+  <link rel="icon" type="image/png" sizes="32x32" href="../assets/icons/favicon.png">
+</head>
+<body>
+
+  <!-- ===================== 1. HERO ===================== -->
+  <section class="hero" aria-labelledby="hero-title">
+    <div class="titlebar">
+      <span>side_erasmus_malta.net</span>
+      <span class="controls" aria-hidden="true">—&nbsp;&nbsp;▢&nbsp;&nbsp;✕</span>
+    </div>
+    <div class="hero-img" role="img" aria-label="View across the Grand Harbour in Malta at sunset: white superyachts and a marina below honey-coloured limestone towns and fortifications, under a pale pink sky"
+         style="background-image:url('../assets/img/erasmus-malta-cover.webp'); background-position: 50% 30%"></div>
+    <div class="caption">
+      <h1 id="hero-title">Erasmus+ Malta</h1>
+      <p>In October 2026 I travelled to Malta for an Erasmus+ program built around POWER, a project on the Prevention Of Weaponization and Enhancing Resilience against security-related disinformation on clean energy. This page covers what the Clean Energy Café taught me about clean energy technologies and the disinformation that targets the energy transition, and how we turned that knowledge into a hands-on campaign.</p>
+      <div class="caption-foot">
+        <a href="#section-1">Start with the Clean Energy Café ↓</a>
+        <span>25/10/2026 – 30/10/2026</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== 2. SECTION 1 (image left, text right) ===================== -->
+  <section class="split" id="section-1" aria-labelledby="section-1-title">
+    <!-- Portrait photo, cropped to the panel: keeps the room and the laptop, loses most of the ceiling. -->
+    <div class="split-img" role="img" aria-label="View from a participant's desk during a training session: a laptop showing a course page, a notebook and a pen in front, with participants at laptops around a U-shaped table listening to a speaker beside a wall screen"
+         style="background-image:url('../assets/img/erasmus-malta-1.webp'); background-position: 50% 80%"></div>
+    <div class="split-text">
+      <h2 id="section-1-title">Inside the Clean Energy Café</h2>
+      <p class="lead">The program followed POWER's Clean Energy Café, a face-to-face format also held in Romania and Spain. We started with the foundations of clean energy technologies, then looked at the disinformation narratives aimed at the energy transition and learned how to identify and analyse them. It showed me where clean energy and security meet, and why false claims about energy are more than a communication problem.</p>
+    </div>
+  </section>
+
+  <!-- ===================== 3. SECTION 2 (text left, image right) ===================== -->
+  <section class="split reverse" id="section-2" aria-labelledby="section-2-title">
+    <!-- Wide photo, cropped to the panel: centred on the bay, keeping the rocks and the ferry. -->
+    <div class="split-img" role="img" aria-label="A turquoise bay on the Maltese coast under a hazy sky: swimmers in the water, rocky headlands in the distance, and visitors on the quay beside a small Comino and Blue Lagoon ferry"
+         style="background-image:url('../assets/img/erasmus-malta-2.webp'); background-position: 55% 50%"></div>
+    <div class="split-text">
+      <h2 id="section-2-title">From Science to Campaign</h2>
+      <p class="lead">The second part of the program moved from analysis to practice. We developed our science communication skills, learning how to explain complex topics clearly, and then applied everything in a hands-on integrated campaign. As a marketer, this was the part closest to my own work: a reminder that a clear message matters most when the facts themselves are being contested.</p>
+    </div>
+  </section>
+
+  <footer>Andrei Andreescu · Timișoara · <a href="../index.html" data-back>Back to side projects</a></footer>
+
+  <script>
+    // Opened inside the portfolio's full-screen project window: the window draws its own
+    // title bar, and "Back to side projects" returns to the folder instead of reloading the site.
+    if (window.self !== window.top) {
+      document.documentElement.classList.add("embedded");
+      document.querySelector("[data-back]").addEventListener("click", (e) => {
+        e.preventDefault();
+        window.parent.postMessage("project-window:close", "*");
+      });
+    }
+  </script>
+  <script src="scroll.js"></script>
+</body>
+</html>

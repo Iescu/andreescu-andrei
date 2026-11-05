@@ -1,0 +1,796 @@
+/* ==========================================================================
+   Hero — "signal and noise"
+   ========================================================================== */
+
+:root {
+  --black: #000;
+  --white: #fff;
+  --gray: #a9a9a9;          /* hero field; keep in sync with GRAIN.background in js/main.js */
+  --ink: #0d0d0d;           /* caption text on the gray field */
+  --font-sans: "Inter Tight", "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, Consolas, monospace;
+  --gutter: clamp(16px, 1.4vw, 32px);
+  /* Desktop UI scale: everything except the background video (taskbar, windows, expanded
+     chrome) is 40% smaller than the comp. Mobile resets this to 1. */
+  --ui: 0.6;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--black);
+  color: var(--white);
+  font-family: var(--font-sans);
+  overflow-x: hidden;
+}
+
+a { color: inherit; text-decoration: none; }
+button { font: inherit; }
+
+:focus-visible { outline: 2px solid var(--white); outline-offset: 4px; }
+
+/* ---------- Hero media: gray (until the video loads) → video → grain (overlay) ---------- */
+
+.hero-frame { position: relative; }
+
+/* Fills the screen so the taskbar sits on the bottom edge. The 16:9
+   video is cropped to fit: at the sides on narrower screens, at the top on wider ones. */
+.hero-media {
+  position: relative;
+  height: 100vh;
+  height: 100svh;
+  overflow: hidden;
+  overflow: clip; /* never a scroll container: focusing the taskbar must not shift it */
+  background: var(--gray);
+  isolation: isolate;
+}
+
+/* The video fills the hero exactly and is cropped to cover it, anchored to the bottom: wide
+   screens lose some of the top, narrow screens lose an equal amount from each side. */
+.hero-art {
+  position: absolute;
+  inset: 0;
+}
+
+/* Video and canvas share one box, so they can never drift apart. */
+.bg-video,
+.grain {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.bg-video {
+  object-fit: cover;
+  object-position: 50% 100%;
+  image-rendering: pixelated; /* pixel art: hard block edges at any screen size, not a blur */
+  pointer-events: none;
+}
+
+.grain {
+  display: block;
+}
+
+/* ---------- Project windows ---------- */
+
+/* Desktop: the window layer sits exactly over the hero media box. No z-index here,
+   so an expanded window can rise above the page overlay. */
+.windows {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* Slots are moved with transform: translate3d() by the motion loop in js/main.js. */
+.win-slot {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: calc(22% * var(--ui));
+  pointer-events: auto;
+}
+.win-slot[hidden] { display: none; }
+/* No transform while expanded: a transformed ancestor would trap the fixed-position dialog. */
+.win-slot.has-expanded { z-index: 101 !important; transform: none !important; }
+
+.obstacle-outline {
+  position: absolute;
+  border: 1px dashed var(--white);
+  pointer-events: none;
+}
+.obstacle-outline[hidden] { display: none; }
+
+.win {
+  display: flex;
+  flex-direction: column;
+  background: var(--gray);
+  border: 1px solid var(--black);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.28);
+  transform-origin: 0 0;
+  outline: none;
+}
+
+.win-bar {
+  display: flex;
+  align-items: stretch;
+  height: max(16px, calc(24px * var(--ui)));
+  background: var(--black);
+  color: var(--white);
+  user-select: none; /* title bars never get text-selected, like on Windows */
+}
+
+.win-name {
+  flex: 1;
+  min-width: 0;
+  align-self: center;
+  padding: 0 calc(8px * var(--ui));
+  overflow: hidden;
+  font-family: var(--font-mono);
+  font-size: max(8px, calc(11px * var(--ui)));
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.win-ctrls { display: flex; flex: none; }
+
+.win-btn {
+  display: grid;
+  place-items: center;
+  width: max(20px, calc(30px * var(--ui)));
+  padding: 0;
+  border: 0;
+  background: var(--black);
+  color: var(--white);
+  cursor: pointer;
+}
+.win-btn[hidden] { display: none; }
+.win-btn svg {
+  width: max(7px, calc(10px * var(--ui)));
+  height: max(7px, calc(10px * var(--ui)));
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1;
+  shape-rendering: crispEdges;
+}
+.win-btn svg * { vector-effect: non-scaling-stroke; } /* stays a crisp 1px line at any size */
+.win-close svg { shape-rendering: geometricPrecision; }
+
+/* Hover / focus: invert to white with a black glyph. Close too — never red. */
+.win-btn:hover,
+.win-btn:focus-visible {
+  background: var(--white);
+  color: var(--black);
+}
+.win-btn:focus-visible {
+  outline: 1px solid var(--black);
+  outline-offset: -4px;
+}
+
+.win-body {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  padding: 0;
+  border: 0;
+  background: var(--gray);
+  cursor: zoom-in;
+}
+.win-body:focus-visible {
+  outline: 2px solid var(--white);
+  outline-offset: -4px;
+  box-shadow: inset 0 0 0 4px var(--black);
+}
+
+.win-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Headline + logo laid over the expanded image (e.g. nJoy). Sized in cqw, so it scales
+   with the window the way type baked into an image would. Expanded view only. */
+.win-art { display: none; }
+.win.is-expanded .win-body {
+  position: relative;
+  container-type: inline-size;
+}
+.win.is-expanded .win-art {
+  position: absolute;
+  inset: 0;
+  display: block;
+  color: var(--white);
+  text-align: left;
+  pointer-events: none;
+  animation: win-fade-in 0.25s 0.2s both;
+}
+.win-art-title {
+  position: absolute;
+  left: 6.1cqw;
+  top: 6cqw;
+  margin: 0;
+  font-size: 3.9cqw;
+  font-weight: 700;
+  line-height: 0.9;
+  letter-spacing: -0.015em;
+  text-transform: uppercase;
+  white-space: pre-line; /* line breaks come from the \n in the project's title */
+}
+.win-art-logo {
+  position: absolute;
+  right: 6cqw;
+  top: 6.2cqw;
+  width: 15cqw;
+  height: auto;
+}
+
+/* Logo-only variant, top-left (UVT FEAA): same placement as the logo in the project's
+   cover image, over a dark fade from the top so white reads on pale backgrounds. */
+.win.is-expanded .win-art--logo-left {
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0) 38%);
+}
+.win-art--logo-left .win-art-logo {
+  right: auto;
+  left: 6cqw;
+  top: 5cqw;
+  width: 9.4cqw;
+}
+
+/* Headline + subtitle bottom-right, logo top-right (beoopsie). Insets follow the
+   design comp, in cqw of the window width. */
+.win-art-sub { display: none; }
+.win-art--bottom-right .win-art-title {
+  left: auto;
+  top: auto;
+  right: 4.4cqw;
+  bottom: calc(4.1cqw + 1.7cqw - 0.05cqw); /* sits on the subtitle */
+  font-family: "Geist", var(--font-sans);
+  font-size: 4cqw; /* largest size that stays clear of the nails in the standard window crop */
+  font-weight: 900; /* Geist Black, as in the comp */
+  line-height: 0.92;
+  letter-spacing: -0.02em;
+  text-align: right;
+}
+.win-art--bottom-right .win-art-sub {
+  position: absolute;
+  right: 4.4cqw;
+  bottom: 4.1cqw;
+  display: block;
+  font-size: 1.7cqw; /* 0.424 × the title size: same width as "COVERED END TO END" */
+  font-weight: 300;
+  line-height: 1;
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+.win-art--bottom-right .win-art-logo {
+  right: 4.2cqw;
+  top: 4.4cqw;
+  width: 5.8cqw;
+}
+
+
+.win-details { display: none; }
+
+/* EXPANDED: large centred view. */
+.win.is-expanded {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  translate: -50% -50%;
+  width: min(70vw, 1100px);
+  max-height: 94vh;
+  overflow: auto;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.5);
+}
+.win.is-expanded .win-bar { flex: none; height: max(22px, calc(32px * var(--ui))); }
+.win.is-expanded .win-name { font-size: max(10px, calc(12px * var(--ui))); padding: 0 calc(12px * var(--ui)); }
+.win.is-expanded .win-btn { width: max(28px, calc(44px * var(--ui))); }
+.win.is-expanded .win-body {
+  flex: none;
+  aspect-ratio: auto;
+  height: min(calc(min(70vw, 1100px) * 0.5625), 62vh);
+  cursor: default;
+}
+
+.win.is-expanded .win-details {
+  display: block;
+  padding: calc(20px * var(--ui)) calc(24px * var(--ui)) calc(24px * var(--ui));
+  background: var(--black);
+  color: var(--white);
+  animation: win-fade-in 0.25s 0.2s both;
+}
+.win-title {
+  margin: 0 0 calc(6px * var(--ui));
+  font-size: clamp(15px, calc(1.6vw * var(--ui)), calc(30px * var(--ui)));
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+}
+.win-desc {
+  margin: 0 0 calc(16px * var(--ui));
+  font-family: var(--font-mono);
+  font-size: max(11px, calc(13px * var(--ui)));
+  line-height: 1.5;
+  color: #bdbdbd;
+}
+.win-link {
+  font-family: var(--font-mono);
+  font-size: max(11px, calc(13px * var(--ui)));
+  letter-spacing: 0.04em;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.4);
+  padding-bottom: 2px;
+}
+.win-link:hover,
+.win-link:focus-visible { border-bottom-color: var(--white); }
+
+.win-foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: calc(16px * var(--ui));
+}
+.win-dates {
+  font-family: var(--font-mono);
+  font-size: max(11px, calc(13px * var(--ui)));
+  letter-spacing: 0.04em;
+  color: #bdbdbd;
+  white-space: nowrap;
+}
+
+@keyframes win-fade-in { from { opacity: 0; } }
+
+.win-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(0, 0, 0, 0.6);
+}
+.win-overlay[hidden] { display: none; }
+
+/* ---------- Taskbar: Windows 11-style bar along the bottom of the hero ---------- */
+
+/* Frosted glass: the video behind it is blurred and lightly saturated, under a dark tint. */
+.taskbar {
+  --tb-h: max(44px, calc(80px * var(--ui))); /* 48px on desktop, like Windows 11 */
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--tb-h);
+  padding: 0 calc(16px * var(--ui));
+  background: rgba(32, 32, 32, 0.72);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  -webkit-backdrop-filter: blur(30px) saturate(140%);
+          backdrop-filter: blur(30px) saturate(140%);
+}
+
+/* Minimized projects, centered. */
+.dock {
+  display: flex;
+  align-items: center;
+  gap: calc(4px * var(--ui));
+  height: 100%;
+}
+
+.dock-frame {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: calc(var(--tb-h) - 8px);
+  height: calc(var(--tb-h) - 8px);
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.dock-frame:hover,
+.dock-frame:focus-visible { background: rgba(255, 255, 255, 0.08); }
+.dock-frame:focus-visible { outline: 1px solid var(--white); outline-offset: 0; }
+
+/* Window-state indicator under each icon. */
+.dock-frame::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 2px;
+  width: 6px;
+  height: 3px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.55);
+  translate: -50% 0;
+  transition: width 0.15s;
+}
+/* Closed: no indicator. Open on the desktop or minimized: short dash. Expanded: long, bright dash. */
+.dock-frame[data-state="closed"]::after { opacity: 0; }
+.dock-frame[data-state="expanded"]::after { width: 16px; background: var(--white); }
+.dock-frame:hover::after { width: 12px; }
+
+.dock-thumb {
+  display: block;
+  width: 60%;
+  aspect-ratio: 1;
+}
+.dock-thumb img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* Tray, bottom right: About me, CV, then envelope + name (opens the business card). */
+.taskbar-tray {
+  position: absolute;
+  right: 0; /* the Show desktop sliver sits flush with the screen edge */
+  top: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.tray-btn,
+.contact-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: calc(var(--tb-h) - 8px);
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--white);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.tray-btn { width: calc(var(--tb-h) - 8px); }
+.tray-btn:hover,
+.tray-btn:focus-visible,
+.contact-btn:hover,
+.contact-btn:focus-visible { background: rgba(255, 255, 255, 0.08); }
+.tray-btn:focus-visible,
+.contact-btn:focus-visible { outline: 1px solid var(--white); outline-offset: 0; }
+
+.tray-btn svg,
+.contact-btn svg {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+.contact-btn svg { width: 18px; height: 18px; }
+.tray-btn svg text {
+  fill: currentColor;
+  stroke: none;
+  font: 700 6.6px var(--font-sans);
+  letter-spacing: -0.02em;
+}
+
+.name { margin: 0; font-size: inherit; }
+.contact-btn {
+  gap: calc(14px * var(--ui));
+  padding: 0 calc(14px * var(--ui));
+}
+.name-lines {
+  display: flex;
+  flex-direction: column;
+  font-size: max(12px, calc(26px * var(--ui)));
+  font-weight: 700;
+  line-height: 0.82;
+  letter-spacing: -0.01em;
+  text-align: left;
+}
+
+/* Show desktop: the thin sliver at the far right of the Windows 11 taskbar. */
+.show-desktop {
+  position: relative;
+  align-self: stretch;
+  width: 12px;
+  margin-left: calc(6px * var(--ui));
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+.show-desktop::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  height: 16px;
+  border-left: 1px solid rgba(255, 255, 255, 0.35);
+  translate: 0 -50%;
+}
+.show-desktop:hover,
+.show-desktop:focus-visible { background: rgba(255, 255, 255, 0.08); }
+.show-desktop:focus-visible { outline: 1px solid var(--white); outline-offset: -1px; }
+
+/* ---------- Desktop icon + side projects folder ---------- */
+
+/* Bottom-left of the desktop, under the drifting windows, like a Windows desktop icon. */
+.desktop-icon {
+  position: absolute;
+  left: calc(16px * var(--ui) + 8px);
+  bottom: calc(max(44px, calc(80px * var(--ui))) + 10px); /* just above the taskbar */
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: max(72px, calc(110px * var(--ui)));
+  padding: 6px 4px;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  background: transparent;
+  color: var(--white);
+  cursor: pointer;
+  user-select: none;
+}
+.desktop-icon:hover,
+.desktop-icon:focus-visible {
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.28);
+}
+.desktop-icon:focus { /* selected (single click), until something else is clicked */
+  outline: none;
+  background: rgba(255, 255, 255, 0.22);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+.folder-glyph {
+  width: max(36px, calc(56px * var(--ui)));
+  height: auto;
+}
+.desktop-icon-label {
+  font-family: var(--font-mono);
+  font-size: max(11px, calc(13px * var(--ui)));
+  line-height: 1.2;
+  text-align: center;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8), 0 0 1px rgba(0, 0, 0, 0.9);
+}
+
+/* Folder window: an Explorer-style list of side projects, in the project window frame. */
+.folder-dialog {
+  width: min(92vw, 760px);
+  max-width: none;
+  background: var(--black);
+  color: var(--white);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.5);
+}
+.folder-dialog .win-bar { height: max(22px, calc(32px * var(--ui))); }
+.folder-dialog .win-name { font-size: max(10px, calc(12px * var(--ui))); padding: 0 calc(12px * var(--ui)); }
+.folder-dialog .win-btn { width: max(28px, calc(44px * var(--ui))); }
+.folder-path {
+  margin: 0;
+  padding: 8px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: #8a8a8a;
+}
+.folder-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 12px;
+  margin: 0;
+  padding: 16px;
+  list-style: none;
+}
+.folder-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  padding: 8px;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.folder-item:hover,
+.folder-item:focus-visible {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+.folder-item:focus-visible { outline: none; }
+.folder-thumb {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  background: #1a1a1a;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: #8a8a8a;
+}
+.folder-thumb.is-empty { outline: 1px dashed #5a5a5a; outline-offset: -8px; } /* image still to come */
+.folder-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.folder-name {
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.15;
+}
+.folder-meta {
+  margin-top: -4px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: #8a8a8a;
+}
+
+/* ---------- Full-screen project page ("View project →") ---------- */
+
+/* Covers the screen down to the top of the taskbar (JS sets --page-win-bottom). */
+.page-win {
+  position: fixed;
+  inset: 0 0 var(--page-win-bottom, 48px) 0;
+  z-index: 102;
+  display: flex;
+  flex-direction: column;
+  background: var(--black);
+  outline: none;
+}
+.page-win[hidden] { display: none; }
+/* Side project pages have no windowed view: ↓ goes back to the folder instead. */
+.page-win.is-side [data-page="restore"] { display: none; }
+.page-win .win-bar { flex: none; height: max(22px, calc(32px * var(--ui))); }
+.page-win .win-name { font-size: max(10px, calc(12px * var(--ui))); padding: 0 calc(12px * var(--ui)); }
+.page-win .win-btn { width: max(28px, calc(44px * var(--ui))); }
+.page-win-frame {
+  flex: 1;
+  width: 100%;
+  min-height: 0;
+  border: 0;
+  background: var(--black);
+}
+
+/* ---------- Pop-ups: About me (modal) + business card (flyout) ---------- */
+
+dialog {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+}
+dialog::backdrop { background: rgba(0, 0, 0, 0.6); }
+dialog[open] { animation: dialog-in 0.25s cubic-bezier(0.2, 0.7, 0.2, 1); }
+@keyframes dialog-in { from { opacity: 0; transform: scale(0.96); } }
+
+/* Business card flyout, Windows 11 calendar style: anchored above the right end of the
+   taskbar (JS sets `right` / `bottom` from the taskbar on open), slides up, no dimming. */
+.card-flyout {
+  container: flyout / inline-size; /* lets the card stack its footer when narrow */
+  position: fixed;
+  inset: auto 12px 60px auto;
+  width: min(440px, calc(100vw - 24px));
+  height: auto;
+  margin: 0;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--white);
+  color: var(--black);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.45);
+}
+.card-flyout:popover-open { animation: flyout-in 0.22s cubic-bezier(0.1, 0.9, 0.2, 1); }
+@keyframes flyout-in { from { opacity: 0; transform: translateY(16px); } }
+
+/* The card itself: 1050 × 600, recreated in type so the links work. */
+.bcard {
+  container-type: inline-size;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-rows: 1fr auto;
+  grid-template-areas: "name name" "role contact";
+  aspect-ratio: 1050 / 600;
+  padding: 4.4% 5% 3.8% 5.2%;
+  background: var(--white);
+  color: var(--black);
+  font-family: var(--font-sans);
+  font-weight: 700;
+  column-gap: 12px;
+}
+.bcard p { margin: 0; }
+.bcard-name {
+  grid-area: name;
+  display: flex;
+  flex-direction: column;
+  font-size: 9.6cqw;
+  line-height: 0.84;
+  letter-spacing: -0.01em;
+}
+.bcard-role,
+.bcard-contact {
+  align-self: end;
+  font-size: max(10px, 3cqw);
+  line-height: 1.25;
+}
+.bcard-role { grid-area: role; }
+.bcard-contact {
+  grid-area: contact;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+.bcard-linkedin {
+  display: block;
+  margin-bottom: 2.6cqw;
+}
+.bcard-linkedin img {
+  display: block;
+  width: max(16px, 3.8cqw);
+  height: auto;
+}
+.bcard a:hover,
+.bcard a:focus-visible { text-decoration: underline; }
+.bcard a:focus-visible { outline: 2px solid var(--black); outline-offset: 2px; }
+
+/* Narrow cards (phones): job title above the contact block, so the email never collides. */
+@container flyout (max-width: 420px) {
+  .bcard {
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr auto auto;
+    grid-template-areas: "name" "role" "contact";
+    row-gap: 4px;
+  }
+  .bcard-contact { align-items: flex-start; }
+}
+
+/* About me: styled like an expanded project window. */
+.about-dialog {
+  width: min(92vw, 560px);
+  max-width: none;
+  background: var(--black);
+  color: var(--white);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.5);
+}
+.about-dialog .win-bar { height: max(22px, calc(32px * var(--ui))); }
+.about-dialog .win-name { font-size: max(10px, calc(12px * var(--ui))); padding: 0 calc(12px * var(--ui)); }
+.about-dialog .win-btn { width: max(28px, calc(44px * var(--ui))); }
+.about-body { padding: 20px 24px 12px; }
+.about-title {
+  margin: 0 0 12px;
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+}
+.about-body p {
+  margin: 0 0 12px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.6;
+  color: #bdbdbd;
+}
+
+/* ---------- Reduced motion: every transition is instant ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .win.is-expanded .win-details { animation: none; }
+  dialog[open],
+  .card-flyout:popover-open { animation: none; }
+}
+
+/* ---------- Mobile ---------- */
+
+@media (max-width: 767.98px) {
+  /* Phones use the same full-screen desktop as computers; sizes are in css/xp.css. */
+  :root { --ui: 1; }
+  .obstacle-outline { display: none; }
+}

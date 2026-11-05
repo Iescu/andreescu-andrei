@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Work and Travel 2024 – Andrei Andreescu</title>
+  <meta name="description" content="Andrei Andreescu’s Work and Travel summer in Minnesota, USA (2024): ride operator at Nickelodeon Universe and Entertainment Team Member at Crayola Experience, Mall of America.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #000;
+      --bar: #000;
+      --border: #2e2e2e;
+      --pad: clamp(28px, 5vw, 72px); /* text inset, shared by the caption and the split sections */
+      --text: #f2f2f2;
+      --muted: #a8a8a8;
+      --accent: #f2f2f2;
+      --mono: "JetBrains Mono", ui-monospace, monospace;
+      --sans: "Inter", system-ui, sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    /* One screen per section; scroll.js moves between them (one per scroll, or to the top / bottom on a hard scroll). */
+    html { overscroll-behavior: none; }
+    body { background: var(--bg); color: var(--text); font-family: var(--sans); line-height: 1.6; }
+    a { color: var(--accent); }
+
+    /* ---------- Window title bar (as in the project_*.net windows) ---------- */
+    .titlebar {
+      display: flex; justify-content: space-between; align-items: center;
+      background: var(--bar); padding: 8px 14px; border-bottom: 1px solid var(--border);
+      font-family: var(--mono); font-size: 13px; font-weight: 700;
+    }
+    .controls { display: flex; gap: 18px; font-weight: 400; color: var(--muted); }
+    .embedded .titlebar { display: none; } /* the portfolio window supplies its own */
+
+    /* ---------- 1. HERO ---------- */
+    /* Hero = title bar + photo + caption, together exactly one screen tall */
+    .hero { height: 100vh; height: 100svh; display: flex; flex-direction: column; border-bottom: 1px solid var(--border); }
+    .hero-img {
+      position: relative; flex: 1 1 auto; min-height: 0;
+      background: #1a1a1a url("../assets/img/wt-capitol-sunset.webp") center 70% / cover no-repeat;
+    }
+    /* Placeholder: marks text and images still to be filled in. Remove the class once replaced. */
+    .todo { outline: 1px dashed #5a5a5a; outline-offset: 4px; }
+    .hero-img.todo, .split-img.todo { outline-offset: -12px; display: grid; place-items: center; font-family: var(--mono); font-size: 12px; color: var(--muted); }
+    /* Same left inset as the split text; the title and description run up to the middle of the screen,
+       the link + dates row spans the full width. */
+    .caption { padding: 24px var(--pad) 28px; display: grid; gap: 10px; background: var(--bg); }
+    .caption h1, .caption p { max-width: 50%; }
+    .caption h1 { font-size: 22px; font-weight: 800; }
+    .caption p { font-family: var(--mono); font-size: 13.5px; color: var(--muted); }
+    .caption-foot {
+      display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px;
+      font-family: var(--mono); font-size: 13px; margin-top: 4px;
+    }
+    .caption-foot a { color: var(--text); text-decoration: none; border-bottom: 1px solid var(--text); }
+
+    /* ---------- 2–3. SPLIT SECTIONS (half image / half text) ---------- */
+    .split {
+      display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); height: 100vh; height: 100svh;
+     
+      border-bottom: 1px solid var(--border);
+    }
+    .split.reverse .split-img { order: 2; }
+    .split-img { background: #1a1a1a center / cover no-repeat; min-height: 320px; }
+    .split-text {
+      padding: var(--pad); display: flex; flex-direction: column;
+      justify-content: center; gap: 18px;
+    }
+    .label { font-family: var(--mono); font-size: 12px; color: var(--accent); letter-spacing: .08em; text-transform: uppercase; }
+    h2 { font-size: clamp(26px, 3vw, 38px); font-weight: 800; line-height: 1.15; }
+    .lead { color: #d8d8d8; }
+
+    /* The footer shares the last screen with the final section, so no extra scroll is needed to reach it. */
+    footer { height: 64px; display: flex; align-items: center; justify-content: center; padding: 0 16px; font-family: var(--mono); font-size: 12px; line-height: 1.5; color: var(--muted); text-align: center; }
+    .split:has(+ footer) { height: calc(100vh - 64px); height: calc(100svh - 64px); }
+
+    @media (max-width: 860px) {
+      /* Phones: still one screen per section, the image takes whatever height the text leaves. */
+      .split { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) auto; }
+      .split.reverse .split-img { order: 0; }
+      .split-img { min-height: 0; }
+      .split-text { padding: 28px 16px 40px; }
+      .caption { padding: 20px 16px 28px; }
+      .caption h1, .caption p { max-width: none; }
+    }
+  </style>
+  <link rel="stylesheet" href="xp-page.css">
+  <link rel="icon" type="image/png" sizes="32x32" href="../assets/icons/favicon.png">
+</head>
+<body>
+
+  <!-- ===================== 1. HERO ===================== -->
+  <section class="hero" aria-labelledby="hero-title">
+    <div class="titlebar">
+      <span>side_work_and_travel_2024.net</span>
+      <span class="controls" aria-hidden="true">—&nbsp;&nbsp;▢&nbsp;&nbsp;✕</span>
+    </div>
+    <div class="hero-img" role="img" aria-label="The US Capitol glowing pink at sunset, seen from the National Mall in Washington, D.C."></div>
+    <div class="caption">
+      <h1 id="hero-title">Work and Travel 2024</h1>
+      <p>In the summer of 2024 I took part in a Work and Travel program in Minnesota, where I held two jobs at Mall of America in Bloomington, the largest mall in the United States. This page covers both roles, as a ride operator at Nickelodeon Universe and as an Entertainment Team Member at Crayola Experience, and what three months alongside an international team taught me about working with people.</p>
+      <div class="caption-foot">
+        <a href="#mall">Start with Mall of America ↓</a>
+        <span>06/2024 – 10/2024</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== 2. MALL OF AMERICA (image left, text right) ===================== -->
+  <section class="split" id="mall" aria-labelledby="mall-title">
+    <div class="split-img" role="img" aria-label="Nickelodeon Universe seen from an upper floor of Mall of America: roller coaster tracks, the TMNT ride and a SpongeBob tower among indoor trees"
+         style="background-image:url('../assets/img/wt-mall-of-america.webp')"></div>
+    <div class="split-text">
+      <h2 id="mall-title">Nickelodeon Universe &amp; Crayola Experience</h2>
+      <p class="lead">At Nickelodeon Universe, the indoor theme park inside Mall of America, I worked as a ride operator, running rides and looking after the guests who lined up for them all day. My second role was at Crayola Experience, as an Entertainment Team Member, in direct contact with families and children from across the country. Both jobs taught me to stay calm, clear and friendly while a constant flow of guests moved through.</p>
+    </div>
+  </section>
+
+  <!-- ===================== 3. INTERNATIONAL TEAM (text left, image right) ===================== -->
+  <section class="split reverse" id="team" aria-labelledby="team-title">
+    <div class="split-img" role="img" aria-label="Andrei's colleagues in green Crayola Experience shirts working at the colourful activity stations, smiling"
+         style="background-image:url('../assets/img/wt-team.webp'); background-position: 50% 45%"></div>
+    <div class="split-text">
+      <h2 id="team-title">Working in an International Team</h2>
+      <p class="lead">Both jobs brought me into an international team of colleagues from many countries, and for three months we worked long, demanding and genuinely fun hours together. The experience strengthened my communication skills and helped me build real relationships in a multicultural environment, which is something I still rely on today when I work with partners from different markets.</p>
+    </div>
+  </section>
+
+  <footer>Andrei Andreescu · Timișoara · <a href="../index.html" data-back>Back to side projects</a></footer>
+
+  <script>
+    // Opened inside the portfolio's full-screen project window: the window draws its own
+    // title bar, and "Back to side projects" returns to the folder instead of reloading the site.
+    if (window.self !== window.top) {
+      document.documentElement.classList.add("embedded");
+      document.querySelector("[data-back]").addEventListener("click", (e) => {
+        e.preventDefault();
+        window.parent.postMessage("project-window:close", "*");
+      });
+    }
+  </script>
+  <script src="scroll.js"></script>
+</body>
+</html>

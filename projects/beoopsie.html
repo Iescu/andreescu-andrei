@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>beoopsie – Andrei Andreescu</title>
+  <meta name="description" content="Andrei Andreescu’s work as Marketing Creative for beoopsie, a handmade 3D press-on nail label: social media content, product photography, newsletters and the Shopify store.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@900&family=Inter+Tight:wght@300&family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #000;
+      --bar: #000;
+      --border: #2e2e2e;
+      --pad: clamp(28px, 5vw, 72px); /* text inset, shared by the caption and the split sections */
+      --text: #f2f2f2;
+      --muted: #a8a8a8;
+      --accent: #f2f2f2;
+      --mono: "JetBrains Mono", ui-monospace, monospace;
+      --sans: "Inter", system-ui, sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    /* One screen per section; scroll.js moves between them (one per scroll, or to the top / bottom on a hard scroll). */
+    html { overscroll-behavior: none; }
+    body { background: var(--bg); color: var(--text); font-family: var(--sans); line-height: 1.6; }
+    a { color: var(--accent); }
+
+    /* ---------- Window title bar (as in the project_*.net windows) ---------- */
+    .titlebar {
+      display: flex; justify-content: space-between; align-items: center;
+      background: var(--bar); padding: 8px 14px; border-bottom: 1px solid var(--border);
+      font-family: var(--mono); font-size: 13px; font-weight: 700;
+    }
+    .controls { display: flex; gap: 18px; font-weight: 400; color: var(--muted); }
+    .embedded .titlebar { display: none; } /* the portfolio window supplies its own */
+
+    /* ---------- 1. HERO ---------- */
+    /* Hero = title bar + photo + caption, together exactly one screen tall */
+    .hero { height: 100vh; height: 100svh; display: flex; flex-direction: column; border-bottom: 1px solid var(--border); }
+    .hero-img {
+      position: relative; flex: 1 1 auto; min-height: 0;
+      background: #1a1a1a url("../assets/projects/beoopsie-hands-hq.webp") 50% 60% / cover no-repeat; /* 10% below centre */
+    }
+    /* Crown top-right, as in the homepage window */
+    .hero-logo { position: absolute; top: 7%; right: 4.4%; width: clamp(40px, 5vw, 84px); height: auto; }
+    /* Headline bottom-right, as in the homepage window. Sized off the photo box (cqw/cqh), so it
+       stays clear of the nails whether the screen is wide (short photo) or narrow. */
+    .hero-img { container-type: size; }
+    .hero-headline {
+      position: absolute; right: 4.4%; bottom: 7cqh; margin: 0;
+      display: flex; flex-direction: column; align-items: flex-end; text-align: right; color: #fff;
+      --h: min(3.4cqw, 10cqh); /* heading size: ~38% of the photo width at most, clear of the nails */
+    }
+    .hero-headline-title {
+      font-family: "Geist", var(--sans); font-weight: 900; font-size: var(--h);
+      line-height: 0.92; letter-spacing: -0.02em; text-transform: uppercase;
+    }
+    .hero-headline-sub {
+      margin-top: calc(var(--h) * 0.12);
+      font-family: "Inter Tight", var(--sans); font-weight: 300; font-size: calc(var(--h) * 0.424); /* same width as the title */
+      line-height: 1.1; white-space: nowrap;
+    }
+    /* Tall photo box (phones): the nails sit higher, leaving the bottom free for bigger type. */
+    @container (max-aspect-ratio: 1 / 1) {
+      .hero-headline { --h: 7.4cqw; right: 16px; bottom: 5cqh; }
+    }
+    /* Placeholder: marks text and images still to be filled in. Remove the class once replaced. */
+    .todo { outline: 1px dashed #5a5a5a; outline-offset: 4px; }
+    .split-img.todo { outline-offset: -12px; display: grid; place-items: center; font-family: var(--mono); font-size: 12px; color: var(--muted); }
+    /* Same left inset as the split text; the title and description run up to the middle of the screen,
+       the link + dates row spans the full width. */
+    .caption { padding: 24px var(--pad) 28px; display: grid; gap: 10px; background: var(--bg); }
+    .caption h1, .caption p { max-width: 50%; }
+    .caption h1 { font-size: 22px; font-weight: 800; }
+    .caption p { font-family: var(--mono); font-size: 13.5px; color: var(--muted); }
+    .caption-foot {
+      display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px;
+      font-family: var(--mono); font-size: 13px; margin-top: 4px;
+    }
+    .caption-foot a { color: var(--text); text-decoration: none; border-bottom: 1px solid var(--text); }
+
+    /* ---------- 2–3. SPLIT SECTIONS (half image / half text) ---------- */
+    .split {
+      display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); height: 100vh; height: 100svh;
+     
+      border-bottom: 1px solid var(--border);
+    }
+    .split.reverse .split-img { order: 2; }
+    .split-img { background: #1a1a1a center / cover no-repeat; min-height: 320px; }
+    .split-text {
+      padding: var(--pad); display: flex; flex-direction: column;
+      justify-content: center; gap: 18px;
+    }
+    .label { font-family: var(--mono); font-size: 12px; color: var(--accent); letter-spacing: .08em; text-transform: uppercase; }
+    h2 { font-size: clamp(26px, 3vw, 38px); font-weight: 800; line-height: 1.15; }
+    .lead { color: #d8d8d8; }
+
+    /* The footer shares the last screen with the final section, so no extra scroll is needed to reach it. */
+    footer { height: 64px; display: flex; align-items: center; justify-content: center; padding: 0 16px; font-family: var(--mono); font-size: 12px; line-height: 1.5; color: var(--muted); text-align: center; }
+    .split:has(+ footer) { height: calc(100vh - 64px); height: calc(100svh - 64px); }
+
+    @media (max-width: 860px) {
+      /* Phones: still one screen per section, the image takes whatever height the text leaves. */
+      .split { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) auto; }
+      .split.reverse .split-img { order: 0; }
+      .split-img { min-height: 0; }
+      .split-text { padding: 28px 16px 40px; }
+      .caption { padding: 20px 16px 28px; }
+      .caption h1, .caption p { max-width: none; }
+    }
+  </style>
+  <link rel="stylesheet" href="xp-page.css">
+  <link rel="icon" type="image/png" sizes="32x32" href="../assets/icons/favicon.png">
+</head>
+<body>
+
+  <!-- ===================== 1. HERO ===================== -->
+  <section class="hero" aria-labelledby="hero-title">
+    <div class="titlebar">
+      <span>project_beoopsie.net</span>
+      <span class="controls" aria-hidden="true">—&nbsp;&nbsp;▢&nbsp;&nbsp;✕</span>
+    </div>
+    <div class="hero-img" role="img" aria-label="Two hands with long red, silver and denim-blue 3D press-on nails, against dark denim, with the headline: One label covered end to end. Content, visuals and a storefront built around limited drops.">
+      <img class="hero-logo" src="../assets/icons/beoopsie-crown-slim.svg" alt="beoopsie crown logo" onerror="this.remove()">
+      <p class="hero-headline" aria-hidden="true">
+        <span class="hero-headline-title">One label<br>covered end to end</span>
+        <span class="hero-headline-sub">content, visuals and a storefront built around limited drops</span>
+      </p>
+    </div>
+    <div class="caption">
+      <h1 id="hero-title">beoopsie</h1>
+      <p>beoopsie is a handmade 3D press-on nail brand built as a streetwear label, selling limited drops in Romania. As Marketing Creative I cover three parts of its marketing, and this page walks through each of them in turn: social media posting, the product and social media photoshoots behind every launch, and the web development of the online store.</p>
+      <div class="caption-foot">
+        <a href="#social">Start with social media ↓</a>
+        <span>2025 – Current</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== 2. SOCIAL MEDIA (image left, text right) ===================== -->
+  <section class="split" id="social" aria-labelledby="social-title">
+    <div class="split-img" role="img" aria-label="Close-up of hands wearing pale pink beoopsie press-on nails with red hearts, gold beads and pearls, holding a red leather bag"
+         style="background-image:url('../assets/img/beoopsie-social.webp')"></div>
+    <div class="split-text">
+      <h2 id="social-title">Social Media Posting</h2>
+      <p class="lead">I run beoopsie's social media with the voice of a streetwear label rather than a beauty brand, planning and posting the content around each limited drop, always written in English. On Instagram this organic content has reached up to 10,000 views per month, and I support each launch with Meta ad campaigns and newsletters that carry the same message.</p>
+    </div>
+  </section>
+
+  <!-- ===================== 3. PHOTOSHOOTS (text left, image right) ===================== -->
+  <section class="split reverse" id="photoshoots" aria-labelledby="photo-title">
+    <div class="split-img" role="img" aria-label="Close-up from above of gloved hands holding two white press-on nails with red dots, next to a dotting tool and a palette of red and white polish"
+         style="background-image:url('../assets/img/beoopsie-photoshoot.webp')"></div>
+    <div class="split-text">
+      <h2 id="photo-title">Product &amp; Social Media Photoshoots</h2>
+      <p class="lead">Press-on nails are still a niche that is gaining ground, especially in Romania, and very few brands were making them look clean and premium, so I took the photography on myself. Every launch includes its own photoshoots, from product close-ups for the store to editorial campaign shoots for social media, which I then edit into the product images, mockups and visuals used across all of our channels.</p>
+    </div>
+  </section>
+
+  <!-- ===================== 4. WEB DEVELOPMENT (image left, text right) ===================== -->
+  <section class="split" id="web" aria-labelledby="web-title">
+    <div class="split-img" role="img" aria-label="The beoopsie Shopify theme editor, with the 'For endless summers' homepage hero being edited"
+         style="background-image:url('../assets/img/beoopsie-web.webp'); background-position: 25% 0"></div>
+    <div class="split-text">
+      <h2 id="web-title">Web Development</h2>
+      <p class="lead">I built beoopsie's Shopify store from scratch and keep maintaining it, and it now brings in around 2,000 visits a month. My latest addition is "Press On Right", a tutorials section with four guides on nail prep, application, removal and reuse, for which I also created the visuals so that the store teaches customers how to get the best out of every set.</p>
+    </div>
+  </section>
+
+  <footer>Andrei Andreescu · Timișoara · <a href="../index.html" data-back>Back to all projects</a></footer>
+
+  <script>
+    // Opened inside the portfolio's full-screen project window: the window draws its own
+    // title bar, and "Back to all projects" closes the window instead of reloading the site.
+    if (window.self !== window.top) {
+      document.documentElement.classList.add("embedded");
+      document.querySelector("[data-back]").addEventListener("click", (e) => {
+        e.preventDefault();
+        window.parent.postMessage("project-window:close", "*");
+      });
+    }
+  </script>
+  <script src="scroll.js"></script>
+</body>
+</html>

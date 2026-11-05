@@ -1,0 +1,94 @@
+/* XP skin for the project pages: system type on a quiet warm background, blue links.
+   The pages read their colours and fonts from :root variables, so most of this is
+   those variables. Loaded after each page's own <style>; remove the <link> to undo. */
+
+:root {
+  --bg: #f5f3ea;
+  --bar: #0058e6;
+  --border: #aca899;
+  --text: #1a1a1a;
+  --muted: #4a4a44;
+  --accent: #0046d5;
+  --mono: Tahoma, Verdana, "Segoe UI", system-ui, sans-serif;
+  --sans: Tahoma, Verdana, "Segoe UI", system-ui, sans-serif;
+  --title: "Trebuchet MS", Tahoma, "Segoe UI", system-ui, sans-serif;
+}
+
+:focus-visible { outline: 1px dotted #000; outline-offset: 2px; }
+
+.titlebar {
+  background: linear-gradient(180deg, #0a5ae8 0%, #3a8cf8 6%, #0f6af0 14%, #0058e6 45%, #0a5ae0 75%, #0447c4 100%);
+  border-bottom: 0;
+  color: #fff;
+  font-family: var(--title);
+}
+.controls { color: #fff; }
+
+.hero-img, .split-img { background-color: #dedbcb; }
+
+.caption h1 { font-family: var(--title); font-size: 24px; font-weight: 700; line-height: 1.2; }
+.caption p { font-size: 14px; line-height: 1.6; }
+.caption-foot { font-size: 13px; }
+.caption-foot a { color: var(--accent); border-bottom-color: var(--accent); }
+
+h2 { font-family: var(--title); font-size: clamp(24px, 2.4vw, 32px); font-weight: 700; line-height: 1.2; }
+.lead { font-size: 16px; line-height: 1.65; color: var(--text); }
+.label { letter-spacing: .04em; color: var(--muted); }
+
+footer { font-size: 12px; }
+
+.todo { outline-color: #716f64; }
+
+/* Phones (any portrait screen up to tablet width): every section must fit one screen, because
+   swiping moves between sections. --u is one "phone pixel", scaling with the screen. */
+@media (max-width: 860px), (orientation: portrait) and (max-width: 1100px) {
+  :root { --u: clamp(0.85px, min(100vw / 390, 100vh / 700), 2.6px); }
+  .split { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) auto; }
+  .split.reverse .split-img { order: 0; }
+  .split-img { min-height: 0; }
+  .split-text { padding: calc(20 * var(--u)) calc(20 * var(--u)) calc(24 * var(--u)); gap: calc(10 * var(--u)); }
+  .caption { padding: calc(18 * var(--u)) calc(20 * var(--u)) calc(20 * var(--u)); gap: calc(10 * var(--u)); }
+  .caption h1, .caption p { max-width: none; }
+  .caption h1 { font-size: calc(30 * var(--u)); }
+  .caption p { font-size: calc(15.5 * var(--u)); line-height: 1.45; }
+  .caption-foot { font-size: calc(15 * var(--u)); }
+  h2 { font-size: calc(27 * var(--u)); }
+  .lead { font-size: calc(16 * var(--u)); line-height: 1.5; }
+  .label { font-size: calc(13 * var(--u)); }
+  .note { font-size: calc(13 * var(--u)); }
+  footer { height: calc(56 * var(--u)); font-size: calc(14 * var(--u)); }
+  .split:has(+ footer) { height: calc(100vh - 56 * var(--u)); height: calc(100svh - 56 * var(--u)); }
+}
+
+/* Small phones: tighter, so the photo keeps some room. */
+@media (max-width: 860px) and (max-height: 560px) {
+  .split-text { padding: 12px 14px 14px; gap: 6px; }
+  .caption { padding: 10px 14px 12px; gap: 5px; }
+  .caption h1 { font-size: 20px; }
+  .caption p { font-size: 13px; line-height: 1.4; }
+  .caption-foot { font-size: 13px; margin-top: 0; }
+  h2 { font-size: 19px; line-height: 1.15; }
+  .lead { font-size: 13.5px; line-height: 1.4; }
+  footer { height: 40px; font-size: 12px; }
+  .split:has(+ footer) { height: calc(100vh - 40px); height: calc(100svh - 40px); }
+}
+
+/* Landscape phones: photo beside the text, as on desktop. */
+@media (max-height: 500px) and (min-width: 480px) {
+  .split { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); }
+  .split.reverse .split-img { order: 2; }
+  .split-img { min-height: 0; }
+  .split-text { padding: 6px 18px; gap: 5px; justify-content: center; }
+  .hero { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); }
+  .embedded .hero-img { border-bottom: 0; }
+  .titlebar { grid-column: 1 / -1; }
+  .caption { align-content: center; padding: 10px 18px; gap: 6px; }
+  .caption h1, .caption p { max-width: none; }
+  .caption h1 { font-size: 20px; }
+  .caption p { font-size: 13px; line-height: 1.4; }
+  .caption-foot { font-size: 13px; }
+  h2 { font-size: 19px; }
+  .lead { font-size: 13.5px; line-height: 1.4; }
+  footer { height: 36px; font-size: 12px; }
+  .split:has(+ footer) { height: calc(100vh - 36px); height: calc(100svh - 36px); }
+}

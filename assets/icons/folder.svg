@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+  <defs>
+    <linearGradient id="back" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f8dc7a"/>
+      <stop offset="1" stop-color="#d9a428"/>
+    </linearGradient>
+    <linearGradient id="front" x1="0.15" y1="0" x2="0.85" y2="1">
+      <stop offset="0" stop-color="#fff5ba"/>
+      <stop offset="0.45" stop-color="#fcdc6e"/>
+      <stop offset="1" stop-color="#eeb636"/>
+    </linearGradient>
+    <filter id="soft" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="1.1"/>
+    </filter>
+  </defs>
+  <!-- Soft shadow on the desktop -->
+  <path d="M9 22h36l-4 21H5z" fill="#000" opacity=".32" filter="url(#soft)"/>
+  <!-- Back of the folder, with its tab -->
+  <path d="M5.5 12.5A2 2 0 0 1 7.5 10.500h10.300a1.500 1.500 0 0 1 1.200.600l2.500 3.400h16.500a2 2 0 0 1 2 2V39.500H5.500z" fill="url(#back)" stroke="#a87a18" stroke-width=".9" stroke-linejoin="round"/>
+  <path d="M6.800 13.200a1 1 0 0 1 1-1.200h9.800" fill="none" stroke="#fff3bd" stroke-width=".9"/>
+  <!-- Sheet of paper inside -->
+  <path d="M10 16.500h27v6H10z" fill="#fffdf2" stroke="#c9c2a0" stroke-width=".6"/>
+  <!-- Front flap -->
+  <path d="M8.200 20.500h34.900a1.100 1.100 0 0 1 1.100 1.300l-3.400 18.700a1.200 1.200 0 0 1-1.200 1H4.900a1.100 1.100 0 0 1-1.100-1.300L7 21.500a1.200 1.200 0 0 1 1.200-1z" fill="url(#front)" stroke="#a87a18" stroke-width=".9" stroke-linejoin="round"/>
+  <path d="M8.600 21.700h33.900" fill="none" stroke="#fffce6" stroke-width="1"/>
+</svg>

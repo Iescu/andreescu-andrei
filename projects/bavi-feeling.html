@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Bavi Feeling – Andrei Andreescu</title>
+  <meta name="description" content="Andrei Andreescu’s university practice at Bavi Feeling: product photoshoots, photo editing and the process behind a Shopify store.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #000;
+      --bar: #000;
+      --border: #2e2e2e;
+      --pad: clamp(28px, 5vw, 72px); /* text inset, shared by the caption and the split sections */
+      --text: #f2f2f2;
+      --muted: #a8a8a8;
+      --accent: #f2f2f2;
+      --mono: "JetBrains Mono", ui-monospace, monospace;
+      --sans: "Inter", system-ui, sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    /* One screen per section; scroll.js moves between them (one per scroll, or to the top / bottom on a hard scroll). */
+    html { overscroll-behavior: none; }
+    body { background: var(--bg); color: var(--text); font-family: var(--sans); line-height: 1.6; }
+    a { color: var(--accent); }
+
+    /* ---------- Window title bar (as in the project_*.net windows) ---------- */
+    .titlebar {
+      display: flex; justify-content: space-between; align-items: center;
+      background: var(--bar); padding: 8px 14px; border-bottom: 1px solid var(--border);
+      font-family: var(--mono); font-size: 13px; font-weight: 700;
+    }
+    .controls { display: flex; gap: 18px; font-weight: 400; color: var(--muted); }
+    .embedded .titlebar { display: none; } /* the portfolio window supplies its own */
+
+    /* ---------- 1. HERO ---------- */
+    /* Hero = title bar + photo + caption, together exactly one screen tall */
+    .hero { height: 100vh; height: 100svh; display: flex; flex-direction: column; border-bottom: 1px solid var(--border); }
+    .hero-img {
+      position: relative; flex: 1 1 auto; min-height: 0;
+      background: #1a1a1a center / cover no-repeat;
+    }
+    /* Placeholder: marks text and images still to be filled in. Remove the class once replaced. */
+    .todo { outline: 1px dashed #5a5a5a; outline-offset: 4px; }
+    .hero-img.todo, .split-img.todo { outline-offset: -12px; display: grid; place-items: center; font-family: var(--mono); font-size: 12px; color: var(--muted); }
+    /* Same left inset as the split text; the title and description run up to the middle of the screen,
+       the link + dates row spans the full width. */
+    .caption { padding: 24px var(--pad) 28px; display: grid; gap: 10px; background: var(--bg); }
+    .caption h1, .caption p { max-width: 50%; }
+    .caption h1 { font-size: 22px; font-weight: 800; }
+    .caption p { font-family: var(--mono); font-size: 13.5px; color: var(--muted); }
+    .caption-foot {
+      display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px;
+      font-family: var(--mono); font-size: 13px; margin-top: 4px;
+    }
+    .caption-foot a { color: var(--text); text-decoration: none; border-bottom: 1px solid var(--text); }
+
+    /* ---------- 2–3. SPLIT SECTIONS (half image / half text) ---------- */
+    .split {
+      display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); height: 100vh; height: 100svh;
+     
+      border-bottom: 1px solid var(--border);
+    }
+    .split.reverse .split-img { order: 2; }
+    .split-img { background: #1a1a1a center / cover no-repeat; min-height: 320px; }
+    .split-text {
+      padding: var(--pad); display: flex; flex-direction: column;
+      justify-content: center; gap: 18px;
+    }
+    .label { font-family: var(--mono); font-size: 12px; color: var(--accent); letter-spacing: .08em; text-transform: uppercase; }
+    h2 { font-size: clamp(26px, 3vw, 38px); font-weight: 800; line-height: 1.15; }
+    .lead { color: #d8d8d8; }
+
+    /* The footer shares the last screen with the final section, so no extra scroll is needed to reach it. */
+    footer { height: 64px; display: flex; align-items: center; justify-content: center; padding: 0 16px; font-family: var(--mono); font-size: 12px; line-height: 1.5; color: var(--muted); text-align: center; }
+    .split:has(+ footer) { height: calc(100vh - 64px); height: calc(100svh - 64px); }
+
+    @media (max-width: 860px) {
+      /* Phones: still one screen per section, the image takes whatever height the text leaves. */
+      .split { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) auto; }
+      .split.reverse .split-img { order: 0; }
+      .split-img { min-height: 0; }
+      .split-text { padding: 28px 16px 40px; }
+      .caption { padding: 20px 16px 28px; }
+      .caption h1, .caption p { max-width: none; }
+    }
+  </style>
+  <link rel="stylesheet" href="xp-page.css">
+  <link rel="icon" type="image/png" sizes="32x32" href="../assets/icons/favicon.png">
+</head>
+<body>
+
+  <!-- ===================== 1. HERO ===================== -->
+  <section class="hero" aria-labelledby="hero-title">
+    <div class="titlebar">
+      <span>side_bavi_feeling.net</span>
+      <span class="controls" aria-hidden="true">—&nbsp;&nbsp;▢&nbsp;&nbsp;✕</span>
+    </div>
+    <div class="hero-img" role="img" aria-label="Square white Bavi Feeling cards on a white table: a stack with the black and yellow wavy BAVI logo, and a voucher card with the code BAVIAIESEC10 and the website www.bavifeeeling.com"
+         style="background-image:url('../assets/img/bavi-feeling-cover.webp'); background-position: 38% 53%"></div>
+    <div class="caption">
+      <h1 id="hero-title">Bavi Feeling</h1>
+      <p>Bavi Feeling is where I did my mandatory university practice, and my first close look at how an online brand works from the inside. This page covers what I learned there, from creating and editing product photoshoots to the process behind a Shopify store, and how it all shaped the marketing work I do today for beoopsie.</p>
+      <div class="caption-foot">
+        <a href="#section-1">Start with the photoshoots ↓</a>
+        <!-- TODO: dates of the practice, e.g. 06/2024 – 07/2024 -->
+        <span class="todo">Dates</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== 2. SECTION 1 (image left, text right) ===================== -->
+  <section class="split" id="section-1" aria-labelledby="section-1-title">
+    <!-- Wide front + back mockup: shown whole on white instead of cropped to the panel. -->
+    <div class="split-img" role="img" aria-label="Black t-shirt product shots, front and back: a small yellow squiggle logo in clouds on the chest, and on the back a large pink bear character in a beanie and yellow goggles floating among clouds"
+         style="background-image:url('../assets/img/bavi-feeling-1.webp'); background-color: #fff; background-size: contain"></div>
+    <div class="split-text">
+      <h2 id="section-1-title">Product Photoshoots &amp; Editing</h2>
+      <p class="lead">During the practice I learned how to create product photoshoots: arranging the products, working with light and angles, and shooting the images an online store actually needs. I then edited the photos myself, turning the raw shots into clean, consistent visuals ready for the website. It is the same process I now use for every beoopsie product launch.</p>
+    </div>
+  </section>
+
+  <!-- ===================== 3. SECTION 2 (text left, image right) ===================== -->
+  <section class="split reverse" id="section-2" aria-labelledby="section-2-title">
+    <!-- Wide store screenshot, cropped to fill the panel: centred on the model and the logo. -->
+    <div class="split-img" role="img" aria-label="The Bavi Feeling Shopify store homepage: a model in a fluffy hot-pink knitted scarf under the menu and the yellow wavy logo, above scrolling banners reading “From our hands to yours, proudly handmade in our studio” and “Heads dare to turn”"
+         style="background-image:url('../assets/img/bavi-feeling-2.webp'); background-position: 55% 50%"></div>
+    <div class="split-text">
+      <h2 id="section-2-title">Behind a Shopify Store</h2>
+      <p class="lead">I also got to see the process behind a Shopify store: how products go from a photoshoot to a finished product page, and what it takes to keep an online shop running day to day. Seeing a small brand work end to end gave me the foundation for the marketing work I now do for beoopsie, including building and managing its Shopify store.</p>
+    </div>
+  </section>
+
+  <footer>Andrei Andreescu · Timișoara · <a href="../index.html" data-back>Back to side projects</a></footer>
+
+  <script>
+    // Opened inside the portfolio's full-screen project window: the window draws its own
+    // title bar, and "Back to side projects" returns to the folder instead of reloading the site.
+    if (window.self !== window.top) {
+      document.documentElement.classList.add("embedded");
+      document.querySelector("[data-back]").addEventListener("click", (e) => {
+        e.preventDefault();
+        window.parent.postMessage("project-window:close", "*");
+      });
+    }
+  </script>
+  <script src="scroll.js"></script>
+</body>
+</html>
