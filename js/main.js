@@ -893,7 +893,7 @@ const motion = (() => {
   let acc = 0;
   let inView = true;
 
-  const bodies = wins.map((w) => ({ w, x: 0, y: 0, px: 0, py: 0, rx: 0, ry: 0, dx: 0, dy: 0, bw: 0, bh: 0, paused: false }));
+  const bodies = wins.map((w) => ({ w, x: 0, y: 0, px: 0, py: 0, rx: 0, ry: 0, dx: 0, dy: 0, bw: 0, bh: 0, paused: false, t: 0, lane: null }));
   const bodyOf = (w) => bodies[wins.indexOf(w)];
   // A window leaves the simulation the moment a minimize/close starts (`busy`), not when it ends.
   const inSim = (b) => b.w.state === "hero" && !b.w.busy;
@@ -1037,7 +1037,55 @@ const motion = (() => {
     if (best) [b.x, b.y] = best;
   }
 
+  /* Phones: too little room for three windows to bounce off each other, so each gets its own lane
+     (rows in portrait, columns in landscape) and glides along a slow sine path inside it. Lanes
+     never overlap, so windows can't collide; the path has no sharp turns, so they never jerk. */
+  function computeLanes() {
+    const portrait = H >= W;
+    const pad = 8;
+    const icon = iconEl?.offsetWidth
+      ? { x: iconEl.offsetLeft - pad, y: iconEl.offsetTop - pad, r: iconEl.offsetLeft + iconEl.offsetWidth + pad, b: iconEl.offsetTop + iconEl.offsetHeight + pad }
+      : null;
+    const band = (portrait ? H : W) / bodies.length;
+    bodies.forEach((b, i) => {
+      const box = portrait
+        ? { x0: 0, x1: Math.max(0, W - b.bw), y0: i * band, y1: Math.max(i * band, (i + 1) * band - b.bh) }
+        : { x0: i * band, x1: Math.max(i * band, (i + 1) * band - b.bw), y0: 0, y1: Math.max(0, H - b.bh) };
+      // Stay clear of the desktop folder.
+      if (icon && box.x0 < icon.r && box.x1 + b.bw > icon.x && box.y0 < icon.b && box.y1 + b.bh > icon.y) {
+        if (portrait) box.x0 = Math.min(icon.r, box.x1);
+        else box.y1 = Math.max(box.y0, icon.y - b.bh);
+      }
+      b.lane = {
+        cx: (box.x0 + box.x1) / 2,
+        cy: (box.y0 + box.y1) / 2,
+        ax: (box.x1 - box.x0) / 2,
+        ay: (box.y1 - box.y0) / 2,
+        // Peak speed about 24 px/s, however long the lane is.
+        wx: 1 / Math.max(3, (box.x1 - box.x0) / 2 / 24),
+        wy: 1 / Math.max(2.2, (box.y1 - box.y0) / 2 / 24),
+        px: i * 2.1 + 0.6,
+        py: i * 1.3,
+      };
+    });
+  }
+
+  function lanePlace(b) {
+    const l = b.lane;
+    b.x = l.cx + l.ax * Math.sin(b.t * l.wx + l.px);
+    b.y = l.cy + l.ay * Math.sin(b.t * l.wy + l.py);
+  }
+
   function step() {
+    if (phoneLayout.matches) {
+      bodies.filter(inSim).forEach((b) => {
+        b.px = b.x;
+        b.py = b.y;
+        if (!b.paused) b.t += STEP;
+        lanePlace(b);
+      });
+      return;
+    }
     const s = CONFIG.speed * W * STEP;
     const list = bodies.filter(inSim);
     list.forEach((b) => {
@@ -1092,7 +1140,12 @@ const motion = (() => {
     H = r.height - taskbarEl.offsetHeight; // windows drift above the taskbar
     bodies.forEach(measure);
     const list = bodies.filter(inSim);
-    resolve(list, 12);
+    if (phoneLayout.matches) {
+      computeLanes();
+      list.forEach(lanePlace);
+    } else {
+      resolve(list, 12);
+    }
     list.forEach(settle);
     render(1);
   }
@@ -1131,6 +1184,13 @@ const motion = (() => {
   function rejoin(w) {
     const b = bodyOf(w);
     measure(b);
+    if (phoneLayout.matches) {
+      computeLanes();
+      lanePlace(b);
+      settle(b);
+      place(b, b.x, b.y);
+      return;
+    }
     b.x = b.rx;
     b.y = b.ry;
     const list = bodies.filter(inSim);
@@ -1173,7 +1233,12 @@ const motion = (() => {
       randomDiagonal(b);
     });
     // Nudge overlapping starts apart before the first frame.
-    resolve(bodies.filter(inSim), 30);
+    if (phoneLayout.matches) {
+      computeLanes();
+      bodies.forEach(lanePlace);
+    } else {
+      resolve(bodies.filter(inSim), 30);
+    }
     bodies.forEach(settle);
     render(1);
   }

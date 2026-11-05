@@ -22,6 +22,9 @@
   };
 
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+  // Phone layout: the browser's own free scrolling, nothing here intervenes.
+  // Keep in sync with the phone block at the end of projects/xp-page.css.
+  const freeScroll = window.matchMedia("(max-width: 860px), (max-height: 500px), (orientation: portrait) and (max-width: 1100px)");
   const root = document.documentElement;
   let stops = [];
   let index = 0;
@@ -81,6 +84,7 @@
   }
 
   window.addEventListener("wheel", (e) => {
+    if (freeScroll.matches) return;
     if (e.ctrlKey) return; // pinch-zoom on trackpads
     e.preventDefault();
     const d = normalize(e);
@@ -115,7 +119,7 @@
 
   let touch = null;
   window.addEventListener("touchstart", (e) => {
-    if (e.touches.length !== 1) { touch = null; return; }
+    if (freeScroll.matches || e.touches.length !== 1) { touch = null; return; }
     touch = { y: e.touches[0].clientY, t: performance.now() };
   }, { passive: true });
 
@@ -135,7 +139,7 @@
   /* ---------- keyboard + in-page links ---------- */
 
   window.addEventListener("keydown", (e) => {
-    if (e.target.closest?.("input, textarea, select, [contenteditable]")) return;
+    if (freeScroll.matches || e.target.closest?.("input, textarea, select, [contenteditable]")) return;
     const k = e.key;
     let handled = true;
     if (k === "ArrowDown" || k === "PageDown" || (k === " " && !e.shiftKey)) move(1);
@@ -147,6 +151,7 @@
   });
 
   document.addEventListener("click", (e) => {
+    if (freeScroll.matches) return;
     const a = e.target.closest('a[href^="#"]');
     const target = a && a.getAttribute("href").length > 1 && document.querySelector(a.getAttribute("href"));
     if (!target) return;
@@ -159,11 +164,12 @@
 
   window.addEventListener("resize", () => {
     measure();
+    if (freeScroll.matches) return; // e.g. the phone's address bar hiding mid-scroll
     anim = null;
     window.scrollTo({ top: stops[index] ?? 0, behavior: "instant" });
   });
 
   measure();
   index = nearest();
-  window.scrollTo({ top: stops[index], behavior: "instant" });
+  if (!freeScroll.matches) window.scrollTo({ top: stops[index], behavior: "instant" });
 })();
