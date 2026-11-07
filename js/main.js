@@ -491,12 +491,8 @@ function addFrame(w) {
   frame.querySelector("img").src = w.p.icon || w.p.image;
   frame.querySelector(".dock-label").textContent = w.p.title;
   frame.addEventListener("click", () => {
-    // This project's full-screen page is open or minimized: the icon toggles it.
-    if (page.w === w && page.state !== "closed") {
-      if (page.state === "open") minimizePage();
-      else if (page.state === "minimized") showPage(frame.querySelector(".dock-thumb").getBoundingClientRect());
-      return;
-    }
+    // This project's full-screen page is open: the icon sends it back to the desktop.
+    if (page.w === w && page.state === "open") return minimizePage();
     if (phoneLayout.matches) return openProject(w);
     if (page.state === "open") minimizePage(); // another project comes forward
     opener = frame;
@@ -607,14 +603,11 @@ async function unminimize(w) {
 /* --- full-screen project page ("View project →") --- */
 
 // One page window at a time. It fills the screen down to the taskbar. A project's page belongs
-// to its window (page.w), which waits in the taskbar and whose icon toggles the page; a side
-// project's page belongs to the folder (page.side) and minimizes into its desktop icon.
+// to its window (page.w) and minimizes back into it, floating on the desktop; a side project's
+// page belongs to the folder (page.side) and minimizes into its desktop icon.
 const pageEl = document.getElementById("page-win");
 const pageFrame = pageEl.querySelector(".page-win-frame");
 const page = { w: null, side: null, state: "closed" }; // "open" | "minimized" | "closed"
-
-// Where a minimized page goes: its project's taskbar icon, or the side projects desktop icon.
-const pageHome = () => (page.w ? page.w.frame.querySelector(".dock-thumb") : desktopGlyph);
 
 function placePage() {
   const r = taskbarEl.getBoundingClientRect();
@@ -684,8 +677,9 @@ function hidePage(state) {
 
 async function minimizePage() {
   if (page.state !== "open") return;
+  if (page.w) return projectPageToDesktop();
   page.state = "minimizing";
-  const anim = await flyTo(pageEl, pageHome().getBoundingClientRect());
+  const anim = await flyTo(pageEl, desktopGlyph.getBoundingClientRect());
   hidePage("minimized");
   anim?.cancel();
 }
@@ -855,8 +849,11 @@ windowsEl.addEventListener("click", (e) => {
     opener = btn;
     expand(w);
   } else if (action === "restore") restore(w);
-  else if (action === "minimize") minimize(w);
-  else if (action === "close") close(w);
+  else if (action === "minimize") {
+    // An opened project goes back to floating on the desktop; only a floating one docks.
+    if (w.state === "expanded") restore(w);
+    else minimize(w);
+  } else if (action === "close") close(w);
 });
 
 overlayEl.addEventListener("click", () => { if (expanded) restore(expanded); });
@@ -886,6 +883,7 @@ document.addEventListener("keydown", (e) => {
 const motion = (() => {
   const STEP = 1 / CONFIG.motionFps;
   const MIN_AXIS = 0.3; // keep both direction components ≥ 30% so paths stay diagonal
+  const EASE_OUT = 0.82; // share of a collision push still left to show after each step
   let W = 0;
   let H = 0;
   let raf = 0;
@@ -893,7 +891,7 @@ const motion = (() => {
   let acc = 0;
   let inView = true;
 
-  const bodies = wins.map((w) => ({ w, x: 0, y: 0, px: 0, py: 0, rx: 0, ry: 0, dx: 0, dy: 0, bw: 0, bh: 0, paused: false, t: 0, lane: null }));
+  const bodies = wins.map((w) => ({ w, x: 0, y: 0, px: 0, py: 0, rx: 0, ry: 0, dx: 0, dy: 0, bw: 0, bh: 0, paused: false, hovered: false, ox: 0, oy: 0 }));
   const bodyOf = (w) => bodies[wins.indexOf(w)];
   // A window leaves the simulation the moment a minimize/close starts (`busy`), not when it ends.
   const inSim = (b) => b.w.state === "hero" && !b.w.busy;
@@ -971,7 +969,7 @@ const motion = (() => {
     if (ox <= 0 || oy <= 0) return;
     if (a.paused && b.paused) {
       // Both held still (hover + keyboard focus) yet overlapping: separate without moving the hovered one.
-      if (a.w.slot.matches(":hover")) b.paused = false; else a.paused = false;
+      if (a.hovered) b.paused = false; else a.paused = false;
       resolvePair(a, b, flip);
       a.paused = b.paused = true;
       return;
@@ -1037,55 +1035,7 @@ const motion = (() => {
     if (best) [b.x, b.y] = best;
   }
 
-  /* Phones: too little room for three windows to bounce off each other, so each gets its own lane
-     (rows in portrait, columns in landscape) and glides along a slow sine path inside it. Lanes
-     never overlap, so windows can't collide; the path has no sharp turns, so they never jerk. */
-  function computeLanes() {
-    const portrait = H >= W;
-    const pad = 8;
-    const icon = iconEl?.offsetWidth
-      ? { x: iconEl.offsetLeft - pad, y: iconEl.offsetTop - pad, r: iconEl.offsetLeft + iconEl.offsetWidth + pad, b: iconEl.offsetTop + iconEl.offsetHeight + pad }
-      : null;
-    const band = (portrait ? H : W) / bodies.length;
-    bodies.forEach((b, i) => {
-      const box = portrait
-        ? { x0: 0, x1: Math.max(0, W - b.bw), y0: i * band, y1: Math.max(i * band, (i + 1) * band - b.bh) }
-        : { x0: i * band, x1: Math.max(i * band, (i + 1) * band - b.bw), y0: 0, y1: Math.max(0, H - b.bh) };
-      // Stay clear of the desktop folder.
-      if (icon && box.x0 < icon.r && box.x1 + b.bw > icon.x && box.y0 < icon.b && box.y1 + b.bh > icon.y) {
-        if (portrait) box.x0 = Math.min(icon.r, box.x1);
-        else box.y1 = Math.max(box.y0, icon.y - b.bh);
-      }
-      b.lane = {
-        cx: (box.x0 + box.x1) / 2,
-        cy: (box.y0 + box.y1) / 2,
-        ax: (box.x1 - box.x0) / 2,
-        ay: (box.y1 - box.y0) / 2,
-        // Peak speed about 24 px/s, however long the lane is.
-        wx: 1 / Math.max(3, (box.x1 - box.x0) / 2 / 24),
-        wy: 1 / Math.max(2.2, (box.y1 - box.y0) / 2 / 24),
-        px: i * 2.1 + 0.6,
-        py: i * 1.3,
-      };
-    });
-  }
-
-  function lanePlace(b) {
-    const l = b.lane;
-    b.x = l.cx + l.ax * Math.sin(b.t * l.wx + l.px);
-    b.y = l.cy + l.ay * Math.sin(b.t * l.wy + l.py);
-  }
-
   function step() {
-    if (phoneLayout.matches) {
-      bodies.filter(inSim).forEach((b) => {
-        b.px = b.x;
-        b.py = b.y;
-        if (!b.paused) b.t += STEP;
-        lanePlace(b);
-      });
-      return;
-    }
     const s = CONFIG.speed * W * STEP;
     const list = bodies.filter(inSim);
     list.forEach((b) => {
@@ -1097,6 +1047,17 @@ const motion = (() => {
       }
     });
     resolve(list, 4);
+    // On tight screens a pinned window can get pushed further than one step of drift. Keep the
+    // physics as is, but ease that correction on screen so it never shows as a jolt.
+    list.forEach((b) => {
+      b.ox *= EASE_OUT;
+      b.oy *= EASE_OUT;
+      if (Math.hypot(b.x - b.px, b.y - b.py) > s * 2) {
+        b.ox -= (b.x - b.px) * EASE_OUT;
+        b.oy -= (b.y - b.py) * EASE_OUT;
+        settle(b, true);
+      }
+    });
   }
 
   function place(b, x, y) {
@@ -1107,7 +1068,7 @@ const motion = (() => {
 
   function render(alpha = 1) {
     bodies.forEach((b) => {
-      if (inSim(b)) place(b, b.px + (b.x - b.px) * alpha, b.py + (b.y - b.py) * alpha);
+      if (inSim(b)) place(b, b.px + (b.x - b.px) * alpha + b.ox, b.py + (b.y - b.py) * alpha + b.oy);
     });
     outlines.forEach(({ el, o }) => {
       const r = toPx(o);
@@ -1115,9 +1076,10 @@ const motion = (() => {
     });
   }
 
-  function settle(b) {
+  function settle(b, keepEase = false) {
     b.px = b.x;
     b.py = b.y;
+    if (!keepEase) b.ox = b.oy = 0;
   }
 
   function measure(b) {
@@ -1140,12 +1102,7 @@ const motion = (() => {
     H = r.height - taskbarEl.offsetHeight; // windows drift above the taskbar
     bodies.forEach(measure);
     const list = bodies.filter(inSim);
-    if (phoneLayout.matches) {
-      computeLanes();
-      list.forEach(lanePlace);
-    } else {
-      resolve(list, 12);
-    }
+    resolve(list, 12);
     list.forEach(settle);
     render(1);
   }
@@ -1184,13 +1141,9 @@ const motion = (() => {
   function rejoin(w) {
     const b = bodyOf(w);
     measure(b);
-    if (phoneLayout.matches) {
-      computeLanes();
-      lanePlace(b);
-      settle(b);
-      place(b, b.x, b.y);
-      return;
-    }
+    // It was hidden while hovered or tapped, so it may never have seen the pointer leave.
+    b.hovered = false;
+    b.paused = false;
     b.x = b.rx;
     b.y = b.ry;
     const list = bodies.filter(inSim);
@@ -1202,12 +1155,20 @@ const motion = (() => {
 
   // Hovering or (keyboard-)focusing a window holds it still. Focus left behind by a mouse
   // click, or returned to a button after the dialog closes, doesn't freeze it; hover covers mice.
+  // Touch never holds: a tap isn't a hover, and :hover stays stuck on after one.
   bodies.forEach((b) => {
     const slot = b.w.slot;
     const keyboardFocus = () => Boolean(slot.querySelector(":focus-visible")) || slot.matches(":focus-visible");
-    const hold = () => { b.paused = slot.matches(":hover") || keyboardFocus(); };
-    slot.addEventListener("pointerenter", () => { b.paused = true; });
-    slot.addEventListener("pointerleave", () => requestAnimationFrame(hold));
+    const hold = () => { b.paused = b.hovered || keyboardFocus(); };
+    slot.addEventListener("pointerenter", (e) => {
+      if (e.pointerType === "touch") return;
+      b.hovered = true;
+      b.paused = true;
+    });
+    slot.addEventListener("pointerleave", () => {
+      b.hovered = false;
+      requestAnimationFrame(hold);
+    });
     slot.addEventListener("focusin", () => requestAnimationFrame(hold));
     slot.addEventListener("focusout", () => requestAnimationFrame(hold));
   });
@@ -1233,12 +1194,7 @@ const motion = (() => {
       randomDiagonal(b);
     });
     // Nudge overlapping starts apart before the first frame.
-    if (phoneLayout.matches) {
-      computeLanes();
-      bodies.forEach(lanePlace);
-    } else {
-      resolve(bodies.filter(inSim), 30);
-    }
+    resolve(bodies.filter(inSim), 30);
     bodies.forEach(settle);
     render(1);
   }
