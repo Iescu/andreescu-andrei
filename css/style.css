@@ -94,6 +94,9 @@ button { font: inherit; }
   pointer-events: auto;
 }
 .win-slot[hidden] { display: none; }
+/* Draw each window once and slide that picture, instead of redrawing it at every subpixel
+   offset: redrawing a fine-grained photo (beoopsie) that small makes its colors shimmer. */
+.win-slot:not(.has-expanded) { will-change: transform; }
 /* No transform while expanded: a transformed ancestor would trap the fixed-position dialog. */
 .win-slot.has-expanded { z-index: 101 !important; transform: none !important; }
 

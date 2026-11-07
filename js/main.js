@@ -7,6 +7,8 @@
 
 // startPosition: where each window begins drifting, as percentages of the hero image area
 // (left/top of the window's top-left corner). Overlapping starts are nudged apart before the first frame.
+// phoneStart: the same on phones, so they open spread out, as 0–1 of the room left over once the window
+// is placed. "along" follows the screen's long side (top to bottom in portrait), "across" the short one.
 const PROJECTS = [
   {
     id: "project-01",
@@ -29,6 +31,7 @@ const PROJECTS = [
     page: "projects/beoopsie.html",
     url: "#",
     startPosition: { left: 4, top: 6 },
+    phoneStart: { across: 0.05, along: 0.04 },
   },
   {
     id: "project-02",
@@ -49,6 +52,7 @@ const PROJECTS = [
     page: "projects/njoy.html",
     url: "#",
     startPosition: { left: 12, top: 48 },
+    phoneStart: { across: 0.9, along: 0.5 },
   },
   {
     id: "project-03",
@@ -68,6 +72,7 @@ const PROJECTS = [
     page: "projects/university.html",
     url: "#",
     startPosition: { left: 72, top: 12 },
+    phoneStart: { across: 0.6, along: 0.96 },
   },
 ];
 
@@ -878,7 +883,8 @@ document.addEventListener("keydown", (e) => {
 /* ---------- Screensaver motion (HERO windows only) ---------- */
 
 // Windows drift in straight diagonals at constant speed, bounce off the bounds and the
-// obstacle rectangles, and collide with each other as equal-mass axis-aligned boxes.
+// obstacle rectangles, and collide with each other as equal-mass axis-aligned boxes, the same on
+// phones and desktop.
 // Positions are px inside the hero image area; directions are unit vectors.
 const motion = (() => {
   const STEP = 1 / CONFIG.motionFps;
@@ -1187,11 +1193,18 @@ const motion = (() => {
     const r = media.getBoundingClientRect();
     W = r.width;
     H = r.height - taskbarEl.offsetHeight;
+    const phone = phoneLayout.matches;
     bodies.forEach((b) => {
       measure(b);
-      b.x = (b.w.p.startPosition.left / 100) * W;
-      b.y = (b.w.p.startPosition.top / 100) * H;
       randomDiagonal(b);
+      if (phone) {
+        const { across, along } = b.w.p.phoneStart;
+        b.x = (H >= W ? across : along) * (W - b.bw);
+        b.y = (H >= W ? along : across) * (H - b.bh);
+      } else {
+        b.x = (b.w.p.startPosition.left / 100) * W;
+        b.y = (b.w.p.startPosition.top / 100) * H;
+      }
     });
     // Nudge overlapping starts apart before the first frame.
     resolve(bodies.filter(inSim), 30);

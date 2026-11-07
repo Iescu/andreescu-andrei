@@ -482,14 +482,15 @@ body:has(#card:popover-open) .contact-btn {
 
   html, body { height: 100%; overflow: hidden; overscroll-behavior: none; }
 
-  /* Floating windows: about half the screen, with the name fully readable. Tapping one opens
-     it, so the maximize button goes and the remaining buttons get bigger. */
-  .win-slot { width: calc(215 * var(--u)); }
-  .win-bar { height: calc(34 * var(--u)); padding: 0 calc(3 * var(--u)) 0 calc(6 * var(--u)); gap: calc(5 * var(--u)); border-radius: calc(7 * var(--u)) calc(7 * var(--u)) 0 0; }
-  .win-ico { width: calc(18 * var(--u)); height: calc(18 * var(--u)); }
-  .win-name { font-size: calc(15 * var(--u)); }
-  .win-btn { width: calc(28 * var(--u)); height: calc(28 * var(--u)); }
-  .win-btn svg { width: calc(11 * var(--u)); height: calc(11 * var(--u)); }
+  /* Floating windows: small enough that three can drift diagonally without meeting, with the
+     name still fully readable. Tapping one opens it, so the maximize button goes and the
+     remaining buttons get bigger. */
+  .win-slot { width: calc(165 * var(--u)); }
+  .win-bar { height: calc(30 * var(--u)); padding: 0 calc(3 * var(--u)) 0 calc(5 * var(--u)); gap: calc(4 * var(--u)); border-radius: calc(6 * var(--u)) calc(6 * var(--u)) 0 0; }
+  .win-ico { width: calc(15 * var(--u)); height: calc(15 * var(--u)); }
+  .win-name { font-size: calc(13 * var(--u)); }
+  .win-btn { width: calc(24 * var(--u)); height: calc(24 * var(--u)); }
+  .win-btn svg { width: calc(10 * var(--u)); height: calc(10 * var(--u)); }
   .win:not(.is-expanded) .win-max { display: none; }
   .win:not(.is-expanded) .win-prefix { display: none; }
 
@@ -618,7 +619,7 @@ body:has(#card:popover-open) .contact-btn {
 
 /* Very small phones: smaller floating windows, so three can drift without overlapping. */
 @media (orientation: portrait) and (max-height: 620px) {
-  .win-slot { width: calc(168 * var(--u)); }
+  .win-slot { width: calc(150 * var(--u)); }
 }
 
 /* Landscape phones: room for labelled task buttons; images are short, so type follows. */
